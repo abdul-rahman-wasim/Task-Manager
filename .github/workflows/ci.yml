@@ -9,6 +9,9 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/taskmanager_test
+      JWT_SECRET: ci-test-secret-value-32-chars-min
 
     services:
       postgres:
@@ -38,19 +41,12 @@ jobs:
 
       - name: Generate Prisma client
         run: npx prisma generate
-        env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/taskmanager_test
 
       - name: Run database migrations
         run: npx prisma migrate deploy
-        env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/taskmanager_test
 
       - name: Run tests
         run: npm test -- --coverage
-        env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/taskmanager_test
-          JWT_SECRET: ci-test-secret-value-32-chars-min
 
       - name: Type check
         run: npx tsc --noEmit
