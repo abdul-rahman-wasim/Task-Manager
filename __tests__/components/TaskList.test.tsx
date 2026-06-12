@@ -4,6 +4,9 @@ import { TaskList } from '@/components/tasks/TaskList'
 
 jest.mock('@/hooks/useTasks', () => ({
   useTasksQuery: jest.fn(),
+  useCreateTask: jest.fn(() => ({ mutateAsync: jest.fn().mockResolvedValue({}), isPending: false, error: null })),
+  useUpdateTask: jest.fn(() => ({ mutate: jest.fn(), mutateAsync: jest.fn().mockResolvedValue({}), isPending: false, error: null })),
+  useDeleteTask: jest.fn(() => ({ mutate: jest.fn(), isPending: false, error: null })),
 }))
 jest.mock('@/hooks/useTaskStream', () => ({ useTaskStream: jest.fn() }))
 jest.mock('@/store/useAppStore', () => ({
