@@ -12,13 +12,17 @@ export const metadata: Metadata = {
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const pusherConfig = process.env.PUSHER_KEY
+    ? { key: process.env.PUSHER_KEY, cluster: process.env.PUSHER_CLUSTER ?? 'mt1' }
+    : null
+
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
         <DarkModeScript />
       </head>
       <body className={`${geist.variable} font-sans min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100`}>
-        <Providers>{children}</Providers>
+        <Providers pusherConfig={pusherConfig}>{children}</Providers>
       </body>
     </html>
   )

@@ -6,6 +6,7 @@ import { db } from '@/lib/db'
 import { getAuthUser } from '@/lib/auth'
 import { logActivity } from '@/lib/logActivity'
 import { taskEmitter } from '@/lib/taskEvents'
+import { pusherServer } from '@/lib/pusher'
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5 MB
 const ALLOWED_TYPES = new Set([
@@ -57,6 +58,7 @@ export async function POST(
 
     await logActivity(id, auth.userId, 'attachment_added', { filename: file.name })
     taskEmitter.emit('task:updated', { taskId: id, userId: auth.userId })
+    pusherServer?.trigger('tasks', 'task:updated', { taskId: id }).catch(() => {})
 
     return Response.json({ attachment }, { status: 201 })
   } catch {

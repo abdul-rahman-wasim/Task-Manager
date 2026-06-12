@@ -4,6 +4,7 @@ import { getAuthUser } from '@/lib/auth'
 import { taskSchema } from '@/lib/validations'
 import { logActivity } from '@/lib/logActivity'
 import { taskEmitter } from '@/lib/taskEvents'
+import { pusherServer } from '@/lib/pusher'
 import type { TaskStatus } from '@/app/generated/prisma/enums'
 import type { TaskWhereInput } from '@/app/generated/prisma/models'
 
@@ -68,6 +69,7 @@ export async function POST(request: NextRequest) {
 
     await logActivity(task.id, auth.userId, 'created')
     taskEmitter.emit('task:created', { taskId: task.id, userId: auth.userId })
+    pusherServer?.trigger('tasks', 'task:created', { taskId: task.id }).catch(() => {})
 
     return Response.json({ task }, { status: 201 })
   } catch {

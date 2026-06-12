@@ -19,6 +19,7 @@ jest.mock('@/lib/db', () => ({
 
 jest.mock('@/lib/logActivity', () => ({ logActivity: jest.fn() }))
 jest.mock('@/lib/taskEvents', () => ({ taskEmitter: { emit: jest.fn() } }))
+jest.mock('@/lib/pusher', () => ({ pusherServer: null }))
 
 import { POST } from '@/app/api/tasks/route'
 import { getAuthUser } from '@/lib/auth'

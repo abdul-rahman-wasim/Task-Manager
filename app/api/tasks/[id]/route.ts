@@ -4,6 +4,7 @@ import { getAuthUser } from '@/lib/auth'
 import { updateTaskSchema } from '@/lib/validations'
 import { logActivity } from '@/lib/logActivity'
 import { taskEmitter } from '@/lib/taskEvents'
+import { pusherServer } from '@/lib/pusher'
 
 async function getTaskOrFail(id: string, userId: string, role: string) {
   const task = await db.task.findUnique({ where: { id } })
@@ -67,6 +68,7 @@ export async function PATCH(
     }
 
     taskEmitter.emit('task:updated', { taskId: id, userId: auth.userId })
+    pusherServer?.trigger('tasks', 'task:updated', { taskId: id }).catch(() => {})
     return Response.json({ task: updated })
   } catch {
     return Response.json({ error: 'Internal server error' }, { status: 500 })
@@ -86,6 +88,7 @@ export async function DELETE(
 
   await db.task.delete({ where: { id } })
   taskEmitter.emit('task:deleted', { taskId: id, userId: auth.userId })
+  pusherServer?.trigger('tasks', 'task:deleted', { taskId: id }).catch(() => {})
 
   return Response.json({ message: 'Task deleted' })
 }
