@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
@@ -44,6 +45,18 @@ export function TaskForm({ open, onClose, task }: TaskFormProps) {
         }
       : { status: 'PENDING', priority: 'MEDIUM' },
   })
+
+  useEffect(() => {
+    if (task && !open) {
+      reset({
+        title: task.title,
+        description: task.description ?? '',
+        status: task.status,
+        priority: task.priority,
+        dueDate: task.dueDate ? task.dueDate.slice(0, 10) : '',
+      })
+    }
+  }, [task, open, reset])
 
   async function onSubmit(values: FormValues) {
     const data: TaskInput = {

@@ -2,8 +2,9 @@
 
 import { createContext, useContext, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useAppStore } from '@/store/useAppStore'
 
-type User = { id: string; email: string; role: 'USER' | 'ADMIN' }
+type User = { id: string; email: string; role: 'USER' | 'ADMIN'; themePreference: string }
 type AuthCtx = { user: User | null; loading: boolean; logout: () => Promise<void> }
 
 const Ctx = createContext<AuthCtx>({ user: null, loading: true, logout: async () => {} })
@@ -16,7 +17,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     fetch('/api/auth/me')
       .then((r) => (r.ok ? r.json() : null))
-      .then((data) => setUser(data?.user ?? null))
+      .then((data) => {
+        setUser(data?.user ?? null)
+        if (data?.user?.themePreference) {
+          useAppStore.getState().setDark(data.user.themePreference === 'dark')
+        }
+      })
       .finally(() => setLoading(false))
   }, [])
 

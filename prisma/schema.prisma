@@ -8,13 +8,14 @@ datasource db {
 }
 
 model User {
-  id           String        @id @default(cuid())
-  email        String        @unique
-  password     String
-  role         Role          @default(USER)
-  tasks        Task[]
-  activityLogs ActivityLog[]
-  createdAt    DateTime      @default(now())
+  id              String        @id @default(cuid())
+  email           String        @unique
+  password        String
+  role            Role          @default(USER)
+  themePreference String        @default("light")
+  tasks           Task[]
+  activityLogs    ActivityLog[]
+  createdAt       DateTime      @default(now())
 }
 
 model Task {

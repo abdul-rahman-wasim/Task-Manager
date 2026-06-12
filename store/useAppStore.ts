@@ -9,6 +9,7 @@ export type StatusFilter = 'ALL' | 'PENDING' | 'IN_PROGRESS' | 'DONE'
 
 interface AppState {
   isDark: boolean
+  setDark: (dark: boolean) => void
   toggleDark: () => void
 
   search: string
@@ -31,7 +32,16 @@ export const useAppStore = create<AppState>()(
   persist(
     (set) => ({
       isDark: false,
-      toggleDark: () => set((s) => ({ isDark: !s.isDark })),
+      setDark: (dark) => set({ isDark: dark }),
+      toggleDark: () => set((s) => {
+        const isDark = !s.isDark
+        fetch('/api/auth/preferences', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ theme: isDark ? 'dark' : 'light' }),
+        }).catch(console.error)
+        return { isDark }
+      }),
 
       search: '',
       setSearch: (search) => set({ search, page: 1 }),
