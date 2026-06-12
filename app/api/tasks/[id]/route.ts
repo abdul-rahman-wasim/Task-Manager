@@ -68,7 +68,7 @@ export async function PATCH(
     }
 
     taskEmitter.emit('task:updated', { taskId: id, userId: auth.userId })
-    pusherServer?.trigger('tasks', 'task:updated', { taskId: id }).catch(() => {})
+    pusherServer?.trigger('tasks', 'task:updated', { taskId: id }).catch(console.error)
     return Response.json({ task: updated })
   } catch {
     return Response.json({ error: 'Internal server error' }, { status: 500 })
@@ -88,7 +88,7 @@ export async function DELETE(
 
   await db.task.delete({ where: { id } })
   taskEmitter.emit('task:deleted', { taskId: id, userId: auth.userId })
-  pusherServer?.trigger('tasks', 'task:deleted', { taskId: id }).catch(() => {})
+  pusherServer?.trigger('tasks', 'task:deleted', { taskId: id }).catch(console.error)
 
   return Response.json({ message: 'Task deleted' })
 }

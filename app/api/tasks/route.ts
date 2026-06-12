@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
 
     await logActivity(task.id, auth.userId, 'created')
     taskEmitter.emit('task:created', { taskId: task.id, userId: auth.userId })
-    pusherServer?.trigger('tasks', 'task:created', { taskId: task.id }).catch(() => {})
+    pusherServer?.trigger('tasks', 'task:created', { taskId: task.id }).catch(console.error)
 
     return Response.json({ task }, { status: 201 })
   } catch {

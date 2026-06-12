@@ -58,7 +58,7 @@ export async function POST(
 
     await logActivity(id, auth.userId, 'attachment_added', { filename: file.name })
     taskEmitter.emit('task:updated', { taskId: id, userId: auth.userId })
-    pusherServer?.trigger('tasks', 'task:updated', { taskId: id }).catch(() => {})
+    pusherServer?.trigger('tasks', 'task:updated', { taskId: id }).catch(console.error)
 
     return Response.json({ attachment }, { status: 201 })
   } catch {

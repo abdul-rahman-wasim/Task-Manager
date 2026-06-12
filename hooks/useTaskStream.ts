@@ -11,6 +11,7 @@ export function useTaskStream() {
 
   useEffect(() => {
     if (pusherConfig) {
+      console.log('[realtime] Pusher connected —', pusherConfig.cluster)
       const pusher = new PusherClient(pusherConfig.key, { cluster: pusherConfig.cluster })
       const channel = pusher.subscribe('tasks')
       const invalidate = () => qc.invalidateQueries({ queryKey: ['tasks'] })
@@ -25,6 +26,7 @@ export function useTaskStream() {
     }
 
     // SSE fallback — single-process dev mode (no Pusher keys)
+    console.warn('[realtime] Pusher not configured — SSE fallback active')
     const es = new EventSource('/api/tasks/stream')
     es.onmessage = () => qc.invalidateQueries({ queryKey: ['tasks'] })
     es.onerror = () => {}
