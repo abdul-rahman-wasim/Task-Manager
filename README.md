@@ -1,116 +1,105 @@
 # Task Manager
 
-A full-stack task management application built with Next.js 16, PostgreSQL, and Prisma.
+A full-stack task management app built with Next.js 16, PostgreSQL, and Prisma. Manage tasks with filtering, search, sorting, file attachments, and an activity log — all behind JWT authentication.
 
-## Quick Start
+## Features
 
-```bash
-# 1. Install dependencies
-npm install
-
-# 2. Copy and configure environment variables
-cp .env.example .env        # then set DATABASE_URL and JWT_SECRET
-
-# 3. Run database migrations
-npm run db:migrate
-
-# 4. Start the dev server
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) — you'll be redirected to the tasks dashboard after signing up.
-
-> **Local Postgres**: You can run `docker-compose up -d postgres` if you have Docker, or point `DATABASE_URL` at any PostgreSQL instance (e.g. Neon).
-
----
+- **Task management** — Create, edit, and delete tasks with title, description, status, priority, and due date
+- **Filtering & search** — Filter by status, search by title, sort by any field
+- **Role-based access** — Admin users can view and manage all tasks across users
+- **File attachments** — Attach images and documents (up to 5 MB) to any task
+- **Activity log** — Per-task history of every change
+- **Optimistic UI** — Changes reflect instantly with automatic rollback on error
+- **Dark mode** — Theme preference saved per user and synced across devices
+- **CI** — GitHub Actions runs tests and type checks on every push
 
 ## Tech Stack
 
-| Layer | Technology |
+| | |
 |---|---|
 | Framework | Next.js 16 (App Router) |
 | Language | TypeScript |
-| Database | PostgreSQL |
-| ORM | Prisma v7 |
-| Auth | JWT via `jose` + httpOnly cookie |
+| Database | PostgreSQL + Prisma v7 |
+| Auth | JWT · httpOnly cookie · `jose` |
 | Validation | Zod v4 |
 | Server state | TanStack Query v5 |
 | UI state | Zustand v5 |
 | Styling | Tailwind CSS v4 |
 | Testing | Jest + React Testing Library |
 
----
+## Getting Started
 
-## Features
+**Prerequisites:** Node.js 18+ and a PostgreSQL database (local or hosted).
 
-### Core
-- **REST API** — `POST/GET/PATCH/DELETE /api/tasks` with filtering, search, sort, and pagination
-- **Authentication** — JWT signup/login, persists across page refreshes via httpOnly cookie
-- **Task management** — Create, edit, delete tasks with title, description, status, priority, and due date
-- **Filters** — Filter by status, search by title, sort by date/priority/title (all work together)
-- **Responsive** — Mobile-friendly layout
+```bash
+# Clone and install
+git clone <repo-url>
+cd task-manager
+npm install
 
-### Bonus
-- **Role-based access** — Admin users see all tasks from all users
-- **Optimistic UI** — Task updates are reflected immediately; rolled back on error
-- **Task attachments** — Upload images and documents (max 5 MB) per task
-- **Activity log** — Full history of changes per task (who did what and when)
-- **Dark mode** — Theme toggle with preference persisted to the database (cross-device)
-- **CI pipeline** — GitHub Actions runs tests and type checks on every push
+# Configure environment
+cp .env.example .env
+# Edit .env — set DATABASE_URL and JWT_SECRET
 
----
+# Set up the database
+npm run db:migrate
+
+# Start the dev server
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000). You'll be prompted to sign up on first visit.
+
+> **Docker**: Run `docker-compose up -d postgres` to start a local Postgres instance if you don't have one already.
+
+## Environment Variables
+
+| Variable | Description |
+|---|---|
+| `DATABASE_URL` | PostgreSQL connection string |
+| `JWT_SECRET` | Secret key for signing JWT tokens |
+
+See `.env.example` for the full list.
 
 ## Project Structure
 
 ```
-app/api/          REST API endpoints
-app/(auth)/       Login / signup pages
-app/tasks/        Main dashboard
-components/       React components (ui/ + tasks/)
-hooks/            TanStack Query hooks
-lib/              Auth, DB, validation helpers
-store/            Zustand store
-prisma/           Schema + migrations
-__tests__/        Jest tests
+app/
+  api/          Route handlers (REST API)
+  (auth)/       Login and signup pages
+  tasks/        Main dashboard
+components/
+  ui/           Base components (Button, Input, Modal…)
+  tasks/        Feature components (TaskCard, TaskForm…)
+contexts/       AuthContext
+hooks/          TanStack Query hooks
+lib/            Auth, DB client, validation, helpers
+store/          Zustand store
+prisma/         Schema and migrations
+__tests__/      Jest tests
 ```
 
----
-
-## Running Tests
-
-```bash
-npm test                 # run all tests
-npm run test:coverage    # with coverage report
-```
-
----
-
-## API Reference
+## API
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| POST | `/api/auth/signup` | Register a new user |
-| POST | `/api/auth/login` | Login, sets httpOnly cookie |
-| POST | `/api/auth/logout` | Clear auth cookie |
-| GET | `/api/auth/me` | Get current user |
-| PATCH | `/api/auth/preferences` | Update theme preference |
-| GET | `/api/tasks` | List tasks (with filters, search, sort, pagination) |
-| POST | `/api/tasks` | Create a task |
-| GET | `/api/tasks/:id` | Get task with activity log |
-| PATCH | `/api/tasks/:id` | Update a task |
-| DELETE | `/api/tasks/:id` | Delete a task |
-| POST | `/api/tasks/:id/attachments` | Upload an attachment |
-| DELETE | `/api/tasks/:id/attachments/:attachmentId` | Remove an attachment |
-| GET | `/api/tasks/:id/activity` | Get activity log for a task |
+| POST | `/api/auth/signup` | Register |
+| POST | `/api/auth/login` | Login |
+| POST | `/api/auth/logout` | Logout |
+| GET | `/api/auth/me` | Current user |
+| PATCH | `/api/auth/preferences` | Update theme |
+| GET | `/api/tasks` | List tasks |
+| POST | `/api/tasks` | Create task |
+| GET | `/api/tasks/:id` | Get task |
+| PATCH | `/api/tasks/:id` | Update task |
+| DELETE | `/api/tasks/:id` | Delete task |
+| POST | `/api/tasks/:id/attachments` | Upload attachment |
+| DELETE | `/api/tasks/:id/attachments/:id` | Remove attachment |
+| GET | `/api/tasks/:id/activity` | Activity log |
 
----
+## Testing
 
-## Assumptions & Trade-offs
-
-- **Next.js full-stack instead of Go backend**: The assessment prefers Go, but allows choosing based on expertise. Using Next.js Route Handlers delivers a clean, production-quality REST API while leveraging the team's strongest skills.
-
-- **File uploads to `public/uploads/`**: Simple and zero-dependency for a development environment. Production deployments should use object storage (S3, Cloudflare R2) for persistence and scalability.
-
-- **JWT in httpOnly cookie (not localStorage)**: More secure against XSS. The 7-day expiry balances security and UX.
-
-- **Dark mode via server-rendered class**: `layout.tsx` reads `themePreference` from the database on every request and sets `class="dark"` on `<html>` server-side. No flash-of-unstyled-content, no localStorage dependency.
+```bash
+npm test               # run all tests
+npm run test:coverage  # with coverage report
+```
