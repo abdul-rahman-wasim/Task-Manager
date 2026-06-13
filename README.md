@@ -9,21 +9,18 @@ A full-stack task management application built with Next.js 16, PostgreSQL, and 
 npm install
 
 # 2. Copy and configure environment variables
-cp .env.example .env        # then set JWT_SECRET
+cp .env.example .env        # then set DATABASE_URL and JWT_SECRET
 
-# 3. Start Postgres (requires Docker)
-docker-compose up -d postgres
-
-# 4. Run database migrations
+# 3. Run database migrations
 npm run db:migrate
 
-# 5. Start the dev server
+# 4. Start the dev server
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) — you'll be redirected to the tasks dashboard after signing up.
 
-See [docs/setup.md](docs/setup.md) for detailed setup instructions including non-Docker options.
+> **Local Postgres**: You can run `docker-compose up -d postgres` if you have Docker, or point `DATABASE_URL` at any PostgreSQL instance (e.g. Neon).
 
 ---
 
@@ -55,12 +52,10 @@ See [docs/setup.md](docs/setup.md) for detailed setup instructions including non
 
 ### Bonus
 - **Role-based access** — Admin users see all tasks from all users
-- **Real-time updates** — Server-Sent Events push task changes live to all connected clients
 - **Optimistic UI** — Task updates are reflected immediately; rolled back on error
 - **Task attachments** — Upload images and documents (max 5 MB) per task
 - **Activity log** — Full history of changes per task (who did what and when)
-- **Dark mode** — Theme toggle with preference persisted to localStorage
-- **Docker Compose** — One-command local setup (`docker-compose up`)
+- **Dark mode** — Theme toggle with preference persisted to the database (cross-device)
 - **CI pipeline** — GitHub Actions runs tests and type checks on every push
 
 ---
@@ -72,15 +67,12 @@ app/api/          REST API endpoints
 app/(auth)/       Login / signup pages
 app/tasks/        Main dashboard
 components/       React components (ui/ + tasks/)
-hooks/            TanStack Query + SSE hooks
+hooks/            TanStack Query hooks
 lib/              Auth, DB, validation helpers
 store/            Zustand store
 prisma/           Schema + migrations
 __tests__/        Jest tests
-docs/             Architecture, API reference, setup guide
 ```
-
-See [CLAUDE.md](CLAUDE.md) for developer context and [docs/architecture.md](docs/architecture.md) for system design.
 
 ---
 
@@ -95,7 +87,21 @@ npm run test:coverage    # with coverage report
 
 ## API Reference
 
-See [docs/api.md](docs/api.md) for the full API reference with request/response examples.
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/auth/signup` | Register a new user |
+| POST | `/api/auth/login` | Login, sets httpOnly cookie |
+| POST | `/api/auth/logout` | Clear auth cookie |
+| GET | `/api/auth/me` | Get current user |
+| PATCH | `/api/auth/preferences` | Update theme preference |
+| GET | `/api/tasks` | List tasks (with filters, search, sort, pagination) |
+| POST | `/api/tasks` | Create a task |
+| GET | `/api/tasks/:id` | Get task with activity log |
+| PATCH | `/api/tasks/:id` | Update a task |
+| DELETE | `/api/tasks/:id` | Delete a task |
+| POST | `/api/tasks/:id/attachments` | Upload an attachment |
+| DELETE | `/api/tasks/:id/attachments/:attachmentId` | Remove an attachment |
+| GET | `/api/tasks/:id/activity` | Get activity log for a task |
 
 ---
 
@@ -103,10 +109,8 @@ See [docs/api.md](docs/api.md) for the full API reference with request/response 
 
 - **Next.js full-stack instead of Go backend**: The assessment prefers Go, but allows choosing based on expertise. Using Next.js Route Handlers delivers a clean, production-quality REST API while leveraging the team's strongest skills.
 
-- **Real-time via SSE instead of WebSockets**: SSE is simpler to implement in Next.js, is natively supported by all modern browsers, and is sufficient for one-directional server→client task updates. WebSockets would be needed for bidirectional communication (e.g. collaborative editing).
-
-- **In-memory EventEmitter for SSE**: Works for single-process development and single-instance deployments. For multi-process or multi-replica production environments, replace with Redis pub/sub (e.g. `ioredis`).
-
 - **File uploads to `public/uploads/`**: Simple and zero-dependency for a development environment. Production deployments should use object storage (S3, Cloudflare R2) for persistence and scalability.
 
 - **JWT in httpOnly cookie (not localStorage)**: More secure against XSS. The 7-day expiry balances security and UX.
+
+- **Dark mode via server-rendered class**: `layout.tsx` reads `themePreference` from the database on every request and sets `class="dark"` on `<html>` server-side. No flash-of-unstyled-content, no localStorage dependency.

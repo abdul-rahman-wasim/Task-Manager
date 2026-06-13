@@ -8,12 +8,14 @@ import Link from 'next/link'
 import { loginSchema, type LoginInput } from '@/lib/validations'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
+import { useAuth } from '@/contexts/AuthContext'
 
 function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const redirect = searchParams.get('redirect') ?? '/tasks'
   const [serverError, setServerError] = useState('')
+  const { loginUser } = useAuth()
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
@@ -27,8 +29,9 @@ function LoginForm() {
       body: JSON.stringify(data),
     })
     if (res.ok) {
+      const body = await res.json()
+      loginUser(body.user)
       router.push(redirect)
-      router.refresh()
     } else {
       const body = await res.json()
       setServerError(body.error ?? 'Login failed')

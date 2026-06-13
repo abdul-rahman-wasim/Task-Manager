@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
     const token = await signToken({ userId: user.id, role: user.role })
     await setAuthCookie(token)
 
-    return Response.json({ user: { id: user.id, email: user.email, role: user.role } })
+    return Response.json({ user: { id: user.id, email: user.email, role: user.role, themePreference: user.themePreference } })
   } catch {
     return Response.json({ error: 'Internal server error' }, { status: 500 })
   }
